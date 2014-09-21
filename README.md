@@ -35,7 +35,8 @@ $config = [
         'assetManager' => [
             ...
             'converter' => [
-                'class' => 'cakebake\lessphp\Converter',
+                'class' => 'cakebake\lessphp\AssetConverter',
+                'compress' => true, // Optional: You can tell less.php to remove comments and whitespace to generate minimized css files.
             ],
 			...
         ],
