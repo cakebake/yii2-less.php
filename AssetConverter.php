@@ -50,7 +50,7 @@ class AssetConverter extends \yii\web\AssetConverter
             return parent::convert($asset, $basePath);
 
         $result = substr($asset, 0, $pos + 1) . self::OUTPUT_EXT;
-        if (@filemtime("$basePath/$result") < filemtime("$basePath/$asset")) {
+        if (@filemtime("$basePath/$result") < @filemtime("$basePath/$asset")) {
             $this->parseLess($basePath, $asset, $result);
         }
 
