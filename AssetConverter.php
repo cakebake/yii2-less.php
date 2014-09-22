@@ -25,14 +25,19 @@ class AssetConverter extends \yii\web\AssetConverter
     public $compress = false;
 
     /**
-    * @var mixed less.php will save serialized parser data for each .less file. Faster, but more memory-intense.
+    * @var bool less.php will save serialized parser data for each .less file. Faster, but more memory-intense.
     */
     public $useCache = false;
 
     /**
-    * @var mixed Optional: is passed to the SetCacheDir() method. By default "cakebake\lessphp\runtime" is used.
+    * @var string|null is passed to the SetCacheDir() method. By default "cakebake\lessphp\runtime" is used.
     */
     public $cacheDir = null;
+
+    /**
+    * @var bool Filename suffix to avoid the browser cache and force recompiling by configuration changes
+    */
+    public $cacheSuffix = false;
 
     /**
      * Converts a given LESS assets file into a CSS
@@ -43,18 +48,43 @@ class AssetConverter extends \yii\web\AssetConverter
      */
     public function convert($asset, $basePath)
     {
-        if (($pos = strrpos($asset, '.')) === false)
+        if (($dotPos = strrpos($asset, '.')) === false)
             return $asset;
 
-        if (($ext = substr($asset, $pos + 1)) !== self::INPUT_EXT)
+        if (($ext = substr($asset, $dotPos + 1)) !== self::INPUT_EXT)
             return parent::convert($asset, $basePath);
 
-        $result = substr($asset, 0, $pos + 1) . self::OUTPUT_EXT;
-        if (@filemtime("$basePath/$result") < @filemtime("$basePath/$asset")) {
+        $assetFilemtime = @filemtime("$basePath/$asset");
+        $result = $this->buildResult($asset, $dotPos, ($this->cacheSuffix === true) ? $assetFilemtime : null);
+        $resultFilemtime = @filemtime("$basePath/$result");
+
+        if ($resultFilemtime < $assetFilemtime) {
             $this->parseLess($basePath, $asset, $result);
         }
 
         return $result;
+    }
+
+    /**
+    * Builds the result file name
+    *
+    * @param string $asset the asset file path, relative to $basePath
+    * @param int $dotPos the strrpos position of filename-extension dot
+    * @param mixed $resultSuffix Suffix result css filename
+    * @return string the converted asset file path, relative to $basePath.
+    */
+    protected function buildResult($asset, $dotPos = null, $resultSuffix = null)
+    {
+        if ($dotPos === null) {
+            if (($dotPos = strrpos($asset, '.')) === false) {
+                return $asset;
+            }
+        }
+
+        $divider = ($this->compress === true) ? '-m' : '-';
+        $suffix = ($resultSuffix !== null) ? $divider . (string)$resultSuffix . '.' . self::OUTPUT_EXT : '.' . self::OUTPUT_EXT;
+
+        return substr($asset, 0, $dotPos) . $suffix;
     }
 
     /**
