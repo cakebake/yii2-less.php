@@ -14,6 +14,15 @@
         "yiisoft/yii2": "*",
 		"oyejorge/less.php": "*"
     },
+    "extra": {
+        "yii\\composer\\Installer::postCreateProject": {
+            "setPermission": [
+                {
+                    "runtime": "0777"
+                }
+            ]
+        }
+    },
     "autoload": {
         "psr-4": {
             "cakebake\\lessphp\\": ""

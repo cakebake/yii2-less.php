@@ -11,6 +11,7 @@ use Yii;
  *
  * @author cakebake (Jens A.)
  * @since 2.0
+ * @see https://github.com/oyejorge/less.php
  */
 class AssetConverter extends \yii\web\AssetConverter
 {
@@ -21,7 +22,17 @@ class AssetConverter extends \yii\web\AssetConverter
     /**
     * @var bool You can tell less.php to remove comments and whitespace to generate minimized css files.
     */
-    public $compress = true;
+    public $compress = false;
+
+    /**
+    * @var mixed less.php will save serialized parser data for each .less file. Faster, but more memory-intense.
+    */
+    public $useCache = false;
+
+    /**
+    * @var mixed Optional: is passed to the SetCacheDir() method. By default "cakebake\lessphp\runtime" is used.
+    */
+    public $cacheDir = null;
 
     /**
      * Converts a given LESS assets file into a CSS
@@ -59,6 +70,7 @@ class AssetConverter extends \yii\web\AssetConverter
     {
         $parser = new \Less_Parser([
             'compress' => ($this->compress === true) ? true : false,
+            'cache_dir' => ($this->useCache === true) ? ($this->cacheDir !== null && is_dir($this->cacheDir)) ? $this->cacheDir : __DIR__ . DIRECTORY_SEPARATOR . 'cache' : false,
         ]);
 
         $parser->parseFile($basePath . DIRECTORY_SEPARATOR . $asset, $basePath);
