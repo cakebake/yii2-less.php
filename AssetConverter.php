@@ -73,7 +73,7 @@ class AssetConverter extends \yii\web\AssetConverter
             'cache_dir' => ($this->useCache === true) ? ($this->cacheDir !== null && is_dir($this->cacheDir)) ? $this->cacheDir : __DIR__ . DIRECTORY_SEPARATOR . 'cache' : false,
         ]);
 
-        $parser->parseFile($basePath . DIRECTORY_SEPARATOR . $asset, $basePath);
+        $parser->parseFile($basePath . DIRECTORY_SEPARATOR . $asset);
 
         if ((!$css = $parser->getCss()) || empty($css))
             return false;
