@@ -40,6 +40,11 @@ class AssetConverter extends \yii\web\AssetConverter
     public $cacheSuffix = false;
 
     /**
+    * @var string String to use for indenting (defaults to 2 spaces)
+    */
+    public $indent = "  ";
+
+    /**
      * Converts a given LESS assets file into a CSS
      *
      * @param string $asset the asset file path, relative to $basePath
@@ -105,11 +110,15 @@ class AssetConverter extends \yii\web\AssetConverter
 
         $parser->parseFile($basePath . DIRECTORY_SEPARATOR . $asset);
 
-        if ((!$css = $parser->getCss()) || empty($css))
+        if ((!$css = $parser->getCss()) || empty($css)) {
             return false;
+        }
 
+        if ($this->indent !== "  ") {
+            $css = str_replace("  ", $this->indent, $css);
+        }
+        
         Yii::trace("Converted $asset into $result", __METHOD__);
-
         return file_put_contents($basePath . DIRECTORY_SEPARATOR . $result, $css, LOCK_EX);
     }
 }
