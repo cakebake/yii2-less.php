@@ -1,5 +1,4 @@
 <?php
-
 namespace pc-brainy\lessphp;
 
 use Yii;
