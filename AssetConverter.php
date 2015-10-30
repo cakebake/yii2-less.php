@@ -1,6 +1,5 @@
 <?php
-
-namespace cakebake\lessphp;
+namespace pc-brainy\lessphp;
 
 use Yii;
 
@@ -18,6 +17,11 @@ class AssetConverter extends \yii\web\AssetConverter
     const INPUT_EXT = 'less';
 
     const OUTPUT_EXT = 'css';
+
+    /**
+     * @var bool Will convert all .less files to css files, even when hasn't change their content, but imported less does.
+     */
+    public $force = false;
 
     /**
     * @var bool You can tell less.php to remove comments and whitespace to generate minimized css files.
@@ -39,6 +43,10 @@ class AssetConverter extends \yii\web\AssetConverter
     */
     public $cacheSuffix = false;
 
+    private $result;
+    private $assetFilemtime;
+    private $resultFilemtime;
+
     /**
      * Converts a given LESS assets file into a CSS
      *
@@ -51,18 +59,30 @@ class AssetConverter extends \yii\web\AssetConverter
         if (($dotPos = strrpos($asset, '.')) === false)
             return $asset;
 
+        //daca nu e less, poti sa returnezi fisierul ca nu trebuie convertit
         if (($ext = substr($asset, $dotPos + 1)) !== self::INPUT_EXT)
             return parent::convert($asset, $basePath);
 
-        $assetFilemtime = @filemtime("$basePath/$asset");
-        $result = $this->buildResult($asset, $dotPos, ($this->cacheSuffix === true) ? $assetFilemtime : null);
-        $resultFilemtime = @filemtime("$basePath/$result");
+        $this->setPrivates($basePath, $asset, $dotPos);
 
-        if ($resultFilemtime < $assetFilemtime) {
-            $this->parseLess($basePath, $asset, $result);
+        if($this->force){
+            $this->parseLess($basePath, $asset, $this->result);
+        }elseif($this->isChanged()){
+            $this->parseLess($basePath, $asset, $this->result);
         }
 
-        return $result;
+        return $this->result;
+    }
+
+    protected function setPrivates($basePath, $asset, $dotPos){
+        $this->assetFilemtime = @filemtime("$basePath/$asset");
+        $this->result = $this->buildResult($asset, $dotPos, ($this->cacheSuffix === true) ? $this->assetFilemtime : null);
+        $this->resultFilemtime = @filemtime("$basePath/$this->result");
+
+    }
+
+    protected function isChanged(){
+        return $this->resultFilemtime < $this->assetFilemtime;
     }
 
     /**
