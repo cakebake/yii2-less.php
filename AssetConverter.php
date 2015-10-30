@@ -1,6 +1,6 @@
 <?php
 
-namespace brainy\lessphp;
+namespace pc-brainy\lessphp;
 
 use Yii;
 
